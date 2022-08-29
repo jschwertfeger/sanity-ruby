@@ -37,24 +37,22 @@ module Sanity
     attr_reader :attributes
 
     def initialize(**args)
-      self.class.default_attributes.merge(args).then do |attrs|
-        attrs.each do |key, val|
-          define_singleton_method("#{key}=") do |val|
-            args[key] = val
-            attributes[key] = val
-          end
-
-          define_singleton_method(key) { args[key] }
+      attrs = self.class.default_attributes.merge(args)
+      attrs.each do |key, val|
+        define_singleton_method("#{key}=") do |val|
+          args[key] = val
+          attributes[key] = val
         end
 
-        instance_variable_set(:@attributes, attrs)
+        define_singleton_method(key) { args[key] }
       end
+
+      instance_variable_set(:@attributes, attrs)
     end
 
     def inspect
-      attributes.keys.map { |key| "#{key}: #{attributes[key].inspect}" }.join(", ").then do |attrs|
-        attrs.empty? ? "#<#{_instance}>" : "#<#{_instance} #{attrs}>"
-      end
+      attrs = attributes.keys.map { |key| "#{key}: #{attributes[key].inspect}" }.join(", ")
+      attrs.empty? ? "#<#{_instance}>" : "#<#{_instance} #{attrs}>"
     end
 
     private

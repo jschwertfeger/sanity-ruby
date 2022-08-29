@@ -14,9 +14,8 @@ module Sanity
       attr_reader :order, :val
 
       def initialize(**args)
-        args.slice(*RESERVED).then do |opts|
-          @order = opts[:order]
-        end
+        opts = args.slice(*RESERVED)
+        @order = opts[:order]
 
         @val = +""
       end
@@ -27,9 +26,8 @@ module Sanity
         raise ArgumentError, "order must be hash" unless order.is_a?(Hash)
 
         order.to_a.each_with_index do |(key, sort), idx|
-          val << " | order(#{key} #{sort})".then do |str|
-            idx.positive? ? str : str.strip
-          end
+          str =" | order(#{key} #{sort})"
+          val << idx.positive? ? str : str.strip
         end
 
         val

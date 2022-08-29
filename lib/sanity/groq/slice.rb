@@ -15,10 +15,9 @@ module Sanity
       attr_reader :limit, :offset
 
       def initialize(**args)
-        args.slice(*RESERVED).then do |opts|
-          @limit = opts[:limit]
-          @offset = opts[:offset]
-        end
+        opts = args.slice(*RESERVED)
+        @limit = opts[:limit]
+        @offset = opts[:offset]
       end
 
       def call

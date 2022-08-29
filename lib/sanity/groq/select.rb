@@ -16,9 +16,8 @@ module Sanity
       attr_reader :select, :val
 
       def initialize(**args)
-        args.slice(*RESERVED).then do |opts|
-          @select = opts[:select]
-        end
+        opts = args.slice(*RESERVED)
+        @select = opts[:select]
 
         @val = +""
       end

@@ -39,11 +39,10 @@ module Sanity
 
         request.body = request_body
 
-        http.request(request).then do |result|
-          data = JSON.parse(result.body)
+        result = http.request(request)
+        data = JSON.parse(result.body)
 
-          block_given? ? yield(result_wrapper.call(data)) : result_wrapper.call(data)
-        end
+        block_given? ? yield(result_wrapper.call(data)) : result_wrapper.call(data)
       end
 
       private

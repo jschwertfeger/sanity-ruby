@@ -45,10 +45,9 @@ module Sanity
         raise ArgumentError, "resource_klass must be defined" unless resource_klass
         raise ArgumentError, "params argument is missing" unless params
 
-        (args.delete(:options) || {}).then do |opts|
-          DEFAULT_QUERY_PARAMS.keys.each do |qup|
-            query_set << [qup, opts.fetch(qup, DEFAULT_QUERY_PARAMS[qup])]
-          end
+        opts = (args.delete(:options) || {})
+        DEFAULT_QUERY_PARAMS.keys.each do |qup|
+          query_set << [qup, opts.fetch(qup, DEFAULT_QUERY_PARAMS[qup])]
         end
         raise ArgumentError, "visibility argument must be one of #{ALLOWED_VISIBILITY}" unless valid_invisibility?
       end
@@ -58,9 +57,12 @@ module Sanity
       end
 
       def call
-        Net::HTTP.post(uri, {"#{REQUEST_KEY}": body}.to_json, headers).then do |result|
-          block_given? ? yield(result_wrapper.call(result)) : result_wrapper.call(result)
+        req = Net::HTTP::Post.new(uri.path, headers)
+        req.body = {"#{REQUEST_KEY}": body}.to_json
+        result = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
+          http.request(req)
         end
+        block_given? ? yield(result_wrapper.call(result)) : result_wrapper.call(result)
       end
 
       private
@@ -76,9 +78,12 @@ module Sanity
       end
 
       def camelize_query_set
-        query_set.to_h.transform_keys do |key|
-          key.to_s.camelize_lower
+        result = {}
+        hash = query_set.to_h
+        hash.each_key do |key|
+          result[key.to_s.camelize_lower] = hash[key]
         end
+        result
       end
 
       def headers
